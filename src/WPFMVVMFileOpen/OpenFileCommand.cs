@@ -95,63 +95,74 @@ namespace WPFMVVMFileOpen
             string title = "OpenFileCommand";
 
             var targetProjectPath = FindProjectPath();
-            var fileName = GetActivateFileName();
-            FindRelativeFile();
-         
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.package,
-                targetProjectPath,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-        }
+            FileInfo file = new FileInfo(targetProjectPath);
+            var projectDirectory = file.Directory.FullName;
 
-        private string FindRelativeFile()
-        {
-            FileInfo targetFile = new FileInfo(fileName);
-
-            string findFile = string.Empty;
-
-            if(!string.IsNullOrEmpty(targetProjectPath))
+            if (!string.IsNullOrEmpty(projectDirectory))
             {
-                FileInfo file = new FileInfo(targetProjectPath);
-                var dirPath = file.DirectoryName; 
-                
-                foreach (string d in Directory.GetFileSystemEntries(dirPath))
+                var fileName = GetActivateFileName();
+
+                if (fileName.EndsWith("View"))
+                    fileName += "Model";
+                else
+                    fileName += "ViewModel";
+
+                string targetFile = FindRelativeFile(projectDirectory, fileName);
+
+                if (targetFile != string.Empty)
                 {
-                    if(File.Exists(d))
-                    {
-                        FileInfo fileInfo = new FileInfo(d);
-
-                        if(fileInfo.Extension == ".cs")
-                        {
-                            var currentFileName = fileInfo.Name.Replace(fileInfo.Extension, string.Empty);
-
-                            targetFile.Replace(targetFile.Extension, string.Empty);
-
-                            if($"{targetFile}Model" == currentFileName)
-                            {
-                                findFile = d;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        FindRelativeFile();
-                    }
+                    var context = Package.GetGlobalService(typeof(DTE)) as DTE;
+                    context.ItemOperations.OpenFile(targetFile);
+                }
+                else
+                {
+                    // Show a message box to prove we were here
+                    VsShellUtilities.ShowMessageBox(
+                        this.package,
+                        "File not found!",
+                        "Error",
+                        OLEMSGICON.OLEMSGICON_INFO,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                 }
             }
 
+        }
 
+        private string FindRelativeFile(string directoryPath, string targetFileName)
+        {
+            string targetFilePath = string.Empty;
+
+            foreach (string dir in Directory.GetFileSystemEntries(directoryPath))
+            {
+                if (File.Exists(dir))
+                {
+                    FileInfo fileInfo = new FileInfo(dir);
+
+                    if (fileInfo.Extension == ".cs")
+                    {
+                        var currentFileName = fileInfo.Name.Replace(fileInfo.Extension, string.Empty);
+
+                        if (currentFileName == targetFileName)
+                        {
+                            targetFilePath = dir;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    FindRelativeFile(dir, targetFileName);
+                }
+            }
+
+            return targetFilePath;
         }
 
         private string FindProjectPath()
-        { 
+        {
             var context = Package.GetGlobalService(typeof(DTE)) as DTE;
-           
+
             var projectPath = new System.Collections.Generic.List<string>();
             foreach (Project proj in context.Solution.Projects)
             {
@@ -176,7 +187,9 @@ namespace WPFMVVMFileOpen
         private string GetActivateFileName()
         {
             var context = Package.GetGlobalService(typeof(DTE)) as DTE;
-            return context.ActiveDocument.Name;
+            var filePath = context.ActiveDocument.FullName;
+            FileInfo file = new FileInfo(filePath);
+            return file.Name.Replace(file.Extension, string.Empty);
         }
     }
 }
