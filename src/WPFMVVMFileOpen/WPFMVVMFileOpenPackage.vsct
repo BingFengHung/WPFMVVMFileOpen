@@ -72,6 +72,10 @@
     </Bitmaps>
   </Commands>
 
+  <KeyBindings>
+    <KeyBinding guid="guidWPFMVVMFileOpenPackageCmdSet" id="OpenFileCommandId" mod1="Control" mod2="Alt" key1="VK_F7" editor="guidVSStd97" />
+  </KeyBindings>
+
   <Symbols>
     <!-- This is the package guid. -->
     <GuidSymbol name="guidWPFMVVMFileOpenPackage" value="{8bf58d62-3ccf-41d4-9bdd-7cf00932274b}" />
