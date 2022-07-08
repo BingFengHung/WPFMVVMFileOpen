@@ -3,14 +3,13 @@
   <Metadata>
     <Identity Id="WPFMVVMFileOpen.f65d03aa-57c8-4105-a61e-b3ec823a57e0" Version="1.0" Language="en-US" Publisher="bingfeng" />
     <DisplayName>WPFMVVMFileOpen</DisplayName>
-    <Description>Empty VSIX Project.</Description>
+    <Description xml:space="preserve">C# WPF MVVM Useful tool
+
+可在 View 與 ViewModel 檔案之間進行快速切換</Description>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 18.0)">
       <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
-    <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
-      <ProductArchitecture>x86</ProductArchitecture>
     </InstallationTarget>
     <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
       <ProductArchitecture>amd64</ProductArchitecture>
