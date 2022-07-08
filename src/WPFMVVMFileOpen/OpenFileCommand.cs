@@ -102,31 +102,93 @@ namespace WPFMVVMFileOpen
             {
                 var fileName = GetActivateFileName();
 
-                if (fileName.EndsWith("View"))
-                    fileName += "Model";
-                else
-                    fileName += "ViewModel";
-
-                string targetFile = FindRelativeFile(projectDirectory, fileName);
-
-                if (targetFile != string.Empty)
+                if(fileName.EndsWith(".xaml.cs") || fileName.EndsWith(".xaml"))
                 {
-                    var context = Package.GetGlobalService(typeof(DTE)) as DTE;
-                    context.ItemOperations.OpenFile(targetFile);
+                    fileName = fileName.Replace(".xaml.cs", string.Empty).Replace(".xaml", string.Empty);
+
+                    if (fileName.EndsWith("View"))
+                        fileName += "Model";
+                    else
+                        fileName += "ViewModel";
+
+                    string targetFile = FindRelativeFile(projectDirectory, fileName);
+
+                    if (targetFile != string.Empty)
+                    {
+                        var context = Package.GetGlobalService(typeof(DTE)) as DTE;
+                        context.ItemOperations.OpenFile(targetFile);
+                    }
+                    else
+                    {
+                        // Show a message box to prove we were here
+                        VsShellUtilities.ShowMessageBox(
+                            this.package, 
+                            "File not found!", 
+                            "Error", 
+                            OLEMSGICON.OLEMSGICON_INFO, 
+                            OLEMSGBUTTON.OLEMSGBUTTON_OK, 
+                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
+                }
+                else if (fileName.EndsWith(".cs"))
+                {
+                    fileName = fileName.Replace(".cs", string.Empty);
+
+                    if(fileName.EndsWith("ViewModel"))
+                    {
+                        fileName = fileName.Replace("Model", string.Empty);
+                        string targetFile = FindRelativeViewFile(projectDirectory, fileName);
+
+                        if(targetFile != string.Empty)
+                        { 
+                            var context = Package.GetGlobalService(typeof(DTE)) as DTE; 
+                            context.ItemOperations.OpenFile(targetFile);
+                        }
+                    }
+                    else
+                    {
+                        // Show a message box to prove we were here
+                        VsShellUtilities.ShowMessageBox(
+                            this.package, 
+                            "File not found!", 
+                            "Error", 
+                            OLEMSGICON.OLEMSGICON_INFO, 
+                            OLEMSGBUTTON.OLEMSGBUTTON_OK, 
+                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
+
+                }
+            }
+        }
+
+        private string FindRelativeViewFile(string directoryPath, string targetFileName)
+        {
+             string targetFilePath = string.Empty;
+
+            foreach (string dir in Directory.GetFileSystemEntries(directoryPath))
+            {
+                if (File.Exists(dir))
+                {
+                    FileInfo fileInfo = new FileInfo(dir);
+
+                    if (fileInfo.Extension == ".xaml")
+                    {
+                        var currentFileName = fileInfo.Name.Replace(fileInfo.Extension, string.Empty);
+
+                        if (currentFileName == targetFileName)
+                        {
+                            targetFilePath = dir;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    // Show a message box to prove we were here
-                    VsShellUtilities.ShowMessageBox(
-                        this.package,
-                        "File not found!",
-                        "Error",
-                        OLEMSGICON.OLEMSGICON_INFO,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    FindRelativeFile(dir, targetFileName);
                 }
             }
 
+            return targetFilePath;
         }
 
         private string FindRelativeFile(string directoryPath, string targetFileName)
@@ -189,7 +251,8 @@ namespace WPFMVVMFileOpen
             var context = Package.GetGlobalService(typeof(DTE)) as DTE;
             var filePath = context.ActiveDocument.FullName;
             FileInfo file = new FileInfo(filePath);
-            return file.Name.Replace(file.Extension, string.Empty);
+            // return file.Name.Replace(file.Extension, string.Empty);
+            return file.Name;
         }
     }
 }

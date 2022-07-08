@@ -73,7 +73,7 @@
   </Commands>
 
   <KeyBindings>
-    <KeyBinding guid="guidWPFMVVMFileOpenPackageCmdSet" id="OpenFileCommandId" mod1="Control" mod2="Alt" key1="VK_F7" editor="guidVSStd97" />
+    <KeyBinding guid="guidWPFMVVMFileOpenPackageCmdSet" id="OpenFileCommandId" mod1="Control" key1="VK_F7" editor="guidVSStd97" />
   </KeyBindings>
 
   <Symbols>
