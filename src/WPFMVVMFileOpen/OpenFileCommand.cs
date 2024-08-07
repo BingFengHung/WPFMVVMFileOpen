@@ -3,10 +3,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
-using System.Globalization;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace WPFMVVMFileOpen
@@ -119,30 +116,30 @@ namespace WPFMVVMFileOpen
                         activeFileName = activeFileName.Replace("Model", string.Empty);
                         targetFile = FindRelateViewFile(projectDirectory, activeFileName);
                     }
-                } 
-                
-                if (targetFile != string.Empty) 
-                { 
-                    var context = Package.GetGlobalService(typeof(DTE)) as DTE; 
-                    context.ItemOperations.OpenFile(targetFile); 
-                } 
-                else 
-                { 
+                }
+
+                if (targetFile != string.Empty)
+                {
+                    var context = Package.GetGlobalService(typeof(DTE)) as DTE;
+                    context.ItemOperations.OpenFile(targetFile);
+                }
+                else
+                {
                     // Show a message box to prove we were here
-                    VsShellUtilities.ShowMessageBox( 
-                        this.package, 
-                        "File not found!", 
-                        "Error", 
-                        OLEMSGICON.OLEMSGICON_INFO, 
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK, 
+                    VsShellUtilities.ShowMessageBox(
+                        this.package,
+                        "File not found!",
+                        "Error",
+                        OLEMSGICON.OLEMSGICON_INFO,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                    }
+                }
             }
         }
 
         private string FindRelateViewFile(string directoryPath, string targetFileName)
         {
-             string targetFilePath = string.Empty;
+            string targetFilePath = string.Empty;
 
             foreach (string dir in Directory.GetFileSystemEntries(directoryPath))
             {
@@ -163,7 +160,13 @@ namespace WPFMVVMFileOpen
                 }
                 else
                 {
-                    FindRelateViewFile(dir, targetFileName);
+                    var isFind = FindRelateViewFile(dir, targetFileName);
+                    if (!string.IsNullOrEmpty(isFind))
+                    {
+                        targetFilePath = isFind;
+                        break;
+                    }
+
                 }
             }
 
@@ -193,7 +196,12 @@ namespace WPFMVVMFileOpen
                 }
                 else
                 {
-                    FindRelateViewModelFile(dir, targetFileName);
+                    var isFind = FindRelateViewModelFile(dir, targetFileName);
+                    if (!string.IsNullOrEmpty(isFind))
+                    {
+                        targetFilePath = isFind;
+                        break;
+                    }
                 }
             }
 
@@ -207,7 +215,9 @@ namespace WPFMVVMFileOpen
             var projectPath = new System.Collections.Generic.List<string>();
             foreach (Project proj in context.Solution.Projects)
             {
-                projectPath.Add(proj.FullName);
+                if (string.IsNullOrEmpty(proj.FullName)) continue;
+                var path = Path.GetDirectoryName(proj.FullName);
+                projectPath.Add(path);
             }
 
             var targetFilePath = context.DTE.ActiveDocument.Path;
@@ -215,7 +225,7 @@ namespace WPFMVVMFileOpen
 
             foreach (var proj in projectPath)
             {
-                if (proj.Contains(targetFilePath))
+                if (targetFilePath.Contains(proj))
                 {
                     targetProjectPath = proj;
                     break;

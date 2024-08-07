@@ -48,6 +48,7 @@ namespace WPFMVVMFileOpen
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await OpenFileCommand.InitializeAsync(this);
+            await FocusOnEditorCommand.InitializeAsync(this);
         }
 
         #endregion
